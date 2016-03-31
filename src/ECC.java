@@ -44,8 +44,11 @@ public class ECC {
     public Point encode(byte[] plaintext) {
         int byteLength = LENGTH>>3;
 
-        byte[] left = Arrays.copyOfRange(plaintext, 0, byteLength-1);
-        byte[] right = Arrays.copyOfRange(plaintext, byteLength, byteLength*2-2);
+        byte[] left = new byte[byteLength+1];
+        byte[] right = new byte[byteLength+1];
+
+        for (int i=0; i<plaintext.length/2; i++) left[i+1] = plaintext[i];
+        for (int i=plaintext.length/2; i<plaintext.length; i++) right[i+1-64] = plaintext[i];
 
         BigInteger x = new BigInteger(left);
         BigInteger y = new BigInteger(right);
