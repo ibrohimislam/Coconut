@@ -10,10 +10,11 @@ import java.util.Random;
 
 public class ECC {
 
+    final public static int LENGTH = 512;
+
     final private static BigInteger prime = new BigInteger("10689075161139667223042978873670922480965002748064399240516442267332455939465850789168580996329723390343748361862365528184970115449827990155533456897223667");
     final private static BigInteger a = new BigInteger("1");
 
-    final private static int LENGTH = 512;
     final private static BigInteger TWO = new BigInteger("2");
     final private static BigInteger THREE = new BigInteger("3");
     final private static BigInteger FOUR = new BigInteger("4");
@@ -41,73 +42,19 @@ public class ECC {
         return B;
     }
 
-    public Point encode(byte[] plaintext) {
-        int byteLength = LENGTH>>3;
-
-        byte[] left = new byte[byteLength+1];
-        byte[] right = new byte[byteLength+1];
-
-        for (int i=0; i<plaintext.length/2; i++) left[i+1] = plaintext[i];
-        for (int i=plaintext.length/2; i<plaintext.length; i++) right[i+1-64] = plaintext[i];
-
-        BigInteger x = new BigInteger(left);
-        BigInteger y = new BigInteger(right);
-
-        return new Point(x,y);
-    }
-
-    public byte[] decode(Point Q) {
-        byte[] xBytes = Q.getX().toByteArray();
-        byte[] yBytes = Q.getY().toByteArray();
-
-        int byteLength = LENGTH>>3;
-
-        byte[] left = new byte[byteLength];
-        byte[] right = new byte[byteLength];
-
-        int xPadding = byteLength - xBytes.length;
-        for (int i=xBytes.length-(byteLength>>1); i<xBytes.length; i++) left[i+xPadding] = xBytes[i];
-
-        int yPadding = byteLength - yBytes.length;
-        for (int i=yBytes.length-(byteLength>>1); i<yBytes.length; i++) right[i+yPadding] = yBytes[i];
-
-        return concat(left, right);
-    }
-
-    public byte[] concat(byte[] a, byte[] b) {
-        int aLen = a.length;
-        int bLen = b.length;
-        byte[] c= new byte[aLen+bLen];
-        System.arraycopy(a, 0, c, 0, aLen);
-        System.arraycopy(b, 0, c, aLen, bLen);
-        return c;
-    }
-
     public Point encrypt(BigInteger k, Point plaintext){
         Point kPb = Q.multiply(k);
 
-        //Point encodedPlainText = encode(plaintext);
-
-        //Point encodedCipherText = encodedPlainText.add(kPb);
-
         Point encodedCipherText = plaintext.add(kPb);
-
-        //return decode(encodedCipherText);
 
         return encodedCipherText;
     }
 
     public Point decrypt(Point kB, Point ciphertext){
 
-        //Point encodedCipherText = encode(ciphertext);
-
         Point key = kB.multiply(p).negate();
 
-        //Point encodedPlainText = encodedCipherText.add(key);
-
         Point encodedPlainText = ciphertext.add(key);
-
-        //return decode(encodedPlainText);
 
         return encodedPlainText;
     }
